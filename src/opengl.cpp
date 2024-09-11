@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <string>
 #include <stdexcept>
+#include <vector>
 
 namespace gl {
 
@@ -54,13 +55,13 @@ class ShaderProgram {
 public:
   unsigned int id;
 
-  ShaderProgram() { id = glCreateProgram(); };
-
-  void attach_shader(const Shader &shader) const {
-    glAttachShader(id, shader.id);
+  ShaderProgram(std::vector<Shader> const &shaders) {
+    id = glCreateProgram();
+    for (auto shader : shaders) {
+      glAttachShader(id, shader.id);
+    }
+    glLinkProgram(id);
   };
-
-  void link() const { glLinkProgram(id); };
 
   void use() const { glUseProgram(id); };
 

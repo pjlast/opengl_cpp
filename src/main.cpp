@@ -31,10 +31,7 @@ int main() {
   gl::Shader vertex_shader(vertex_shader_source, gl::Vertex);
   gl::Shader fragment_shader(fragment_shader_source, gl::Fragment);
 
-  gl::ShaderProgram shader_program;
-  shader_program.attach_shader(vertex_shader);
-  shader_program.attach_shader(fragment_shader);
-  shader_program.link();
+  gl::ShaderProgram shader_program({vertex_shader, fragment_shader});
   shader_program.use();
 
   float triangle_vertices[][3] = {
