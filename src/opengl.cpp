@@ -1,5 +1,5 @@
 #include <glad/glad.h>
-#include <iostream>
+#include <string>
 #include <stdexcept>
 
 namespace gl {
@@ -41,8 +41,9 @@ public:
       char infoLog[512];
       glGetShaderInfoLog(id, 512, NULL, infoLog);
       glDeleteShader(id);
-      throw std::runtime_error("ERROR::SHADER::COMPILATION_FAILED\n" +
-                               std::string(infoLog));
+      std::string error_msg = "ERROR::SHADER::COMPILATION_FAILED\n";
+      error_msg.append(infoLog);
+      throw std::runtime_error(error_msg);
     }
   };
 
