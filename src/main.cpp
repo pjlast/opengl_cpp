@@ -61,8 +61,8 @@ int main() {
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     // check and call events and swap the buffers
-    glfwSwapBuffers(window.window);
-    glfwPollEvents();
+    window.swap_buffers();
+    glfw::poll_events();
   }
   return 0;
 }

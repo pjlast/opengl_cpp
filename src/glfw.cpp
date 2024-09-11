@@ -10,7 +10,9 @@ void framebuffer_size_callback(GLFWwindow *const window, const int width,
 
 namespace glfw {
 enum Key { escape = GLFW_KEY_ESCAPE };
-enum Action { press = GLFW_PRESS };
+enum Action { press = GLFW_PRESS, release = GLFW_RELEASE };
+
+void poll_events() { glfwPollEvents(); }
 
 class Window {
 public:
@@ -40,10 +42,12 @@ public:
 
   ~Window() { glfwTerminate(); };
 
-  bool should_close() const { return glfwWindowShouldClose(this->window); }
+  bool should_close() const { return glfwWindowShouldClose(this->window); };
   void set_should_close(const bool value) const {
     glfwSetWindowShouldClose(this->window, value);
-  }
+  };
+
+  void swap_buffers() const { glfwSwapBuffers(this->window); };
 
   bool get_key(const Key key, const Action action) const {
     return glfwGetKey(this->window, key) == action;
