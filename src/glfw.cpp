@@ -9,8 +9,8 @@ void framebuffer_size_callback(GLFWwindow *const window, const int width,
 }
 
 namespace glfw {
-enum Key { escape = GLFW_KEY_ESCAPE };
-enum Action { press = GLFW_PRESS, release = GLFW_RELEASE };
+enum class Key { escape = GLFW_KEY_ESCAPE };
+enum class Action { press = GLFW_PRESS, release = GLFW_RELEASE };
 
 void poll_events() { glfwPollEvents(); }
 
@@ -50,7 +50,8 @@ public:
   void swap_buffers() const { glfwSwapBuffers(this->window); };
 
   bool get_key(const Key key, const Action action) const {
-    return glfwGetKey(this->window, key) == action;
+    return glfwGetKey(this->window, static_cast<int>(key)) ==
+           static_cast<int>(action);
   };
 };
 } // namespace glfw

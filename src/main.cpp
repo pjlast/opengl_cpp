@@ -20,7 +20,7 @@ const char *fragment_shader_source =
     "}\0";
 
 void process_input(glfw::Window const &window) {
-  if (window.get_key(glfw::escape, glfw::press)) {
+  if (window.get_key(glfw::Key::escape, glfw::Action::press)) {
     window.set_should_close(true);
   }
 }
