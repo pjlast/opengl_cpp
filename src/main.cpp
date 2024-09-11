@@ -1,7 +1,7 @@
-#include "glad/glad.h"
+#include <glad/glad.h>
 #include "opengl.cpp"
 #include <GLFW/glfw3.h>
-#include <iostream>
+#include "glfw.cpp"
 
 const char *vertex_shader_source =
     "#version 330 core\n"
@@ -19,51 +19,17 @@ const char *fragment_shader_source =
     "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
     "}\0";
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-  glViewport(0, 0, width, height);
-}
-
-void process_input(GLFWwindow *window) {
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, true);
+void process_input(glfw::Window const &window) {
+  if (window.get_key(glfw::escape, glfw::press)) {
+    window.set_should_close(true);
   }
 }
 
 int main() {
-  glfwInit();
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  const glfw::Window window(800, 600, "Hello Traingle");
 
-  GLFWwindow *window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
-  if (window == NULL) {
-    std::cout << "Failed to create GLFW window" << std::endl;
-    glfwTerminate();
-    return -1;
-  }
-  glfwMakeContextCurrent(window);
-
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    std::cout << "Failed to initialize GLAD" << std::endl;
-    glfwTerminate();
-    return -1;
-  }
-
-  glViewport(0, 0, 800, 600);
-
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-  float triangle_vertices[][3] = {
-      {-0.5f, -0.5f, 0.0f}, {0.5f, -0.5f, 0.0f}, {0.0f, 0.5f, 0.0f}};
-
-  unsigned int VBO;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_vertices), triangle_vertices,
-               GL_STATIC_DRAW);
-
-  gl::Shader vertex_shader(vertex_shader_source, gl::ShaderType::VERTEX);
-  gl::Shader fragment_shader(fragment_shader_source, gl::ShaderType::FRAGMENT);
+  gl::Shader vertex_shader(vertex_shader_source, gl::Vertex);
+  gl::Shader fragment_shader(fragment_shader_source, gl::Fragment);
 
   gl::ShaderProgram shader_program;
   shader_program.attach_shader(vertex_shader);
@@ -71,17 +37,21 @@ int main() {
   shader_program.link();
   shader_program.use();
 
+  float triangle_vertices[][3] = {
+      {-0.5f, -0.5f, 0.0f}, {0.5f, -0.5f, 0.0f}, {0.0f, 0.5f, 0.0f}};
+
+  auto vbo = gl::Buffer(GL_ARRAY_BUFFER);
+
   unsigned int VAO;
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_vertices), triangle_vertices,
-               GL_STATIC_DRAW);
+  vbo.bind();
+  vbo.set_data(triangle_vertices);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
   // render loop
-  while (!glfwWindowShouldClose(window)) {
+  while (!window.should_close()) {
     // input
     process_input(window);
 
@@ -91,14 +61,11 @@ int main() {
 
     shader_program.use();
     glBindVertexArray(VAO);
-    glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     // check and call events and swap the buffers
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(window.window);
     glfwPollEvents();
   }
-
-  glfwTerminate();
   return 0;
 }
