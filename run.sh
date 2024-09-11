@@ -1,1 +1,1 @@
-cmake -S . -B build && cd build && make && ./main
+cmake -S . -B build && cd build && make && ./src/main
