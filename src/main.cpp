@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "glfw.cpp"
 
-const char *vertex_shader_source =
+const char *const vertex_shader_source =
     "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
     "void main()\n"
@@ -11,7 +11,7 @@ const char *vertex_shader_source =
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\0";
 
-const char *fragment_shader_source =
+const char *const fragment_shader_source =
     "#version 330 core\n"
     "out vec4 FragColor;\n"
     "void main()\n"
@@ -31,20 +31,23 @@ int main() {
   gl::Shader vertex_shader(vertex_shader_source, gl::Vertex);
   gl::Shader fragment_shader(fragment_shader_source, gl::Fragment);
 
-  gl::ShaderProgram shader_program({vertex_shader, fragment_shader});
+  const gl::ShaderProgram shader_program;
+  shader_program.attach_shader(vertex_shader);
+  shader_program.attach_shader(fragment_shader);
+  shader_program.link();
   shader_program.use();
 
-  float triangle_vertices[][3] = {
+  // NOLINTNEXTLINE - idk wtf else to do here
+  float triangle_vertices[3][3] = {
       {-0.5f, -0.5f, 0.0f}, {0.5f, -0.5f, 0.0f}, {0.0f, 0.5f, 0.0f}};
 
-  auto vbo = gl::Buffer(GL_ARRAY_BUFFER);
+  gl::Buffer vbo(GL_ARRAY_BUFFER);
 
-  unsigned int VAO;
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
+  gl::VertexArray vao;
+  vao.bind();
   vbo.bind();
   vbo.set_data(triangle_vertices);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
   glEnableVertexAttribArray(0);
 
   // render loop
@@ -57,7 +60,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     shader_program.use();
-    glBindVertexArray(VAO);
+    vao.bind();
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
     // check and call events and swap the buffers

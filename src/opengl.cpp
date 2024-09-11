@@ -1,19 +1,34 @@
 #include <glad/glad.h>
 #include <string>
 #include <stdexcept>
-#include <vector>
+#include <array>
 
 namespace gl {
 
+class VertexArray {
+public:
+  unsigned int id{};
+  VertexArray() { glGenVertexArrays(1, &this->id); }
+  VertexArray(const VertexArray &) = default;
+  VertexArray(VertexArray &&) = delete;
+  VertexArray &operator=(const VertexArray &) = default;
+  VertexArray &operator=(VertexArray &&) = delete;
+  ~VertexArray() { glDeleteVertexArrays(1, &this->id); }
+  void bind() const { glBindVertexArray(this->id); }
+};
+
 class Buffer {
 public:
-  unsigned int id;
+  unsigned int id{};
   int buffer_type;
 
-  Buffer(const int buffer_type) {
+  Buffer(const int buffer_type) : buffer_type(buffer_type) {
     glGenBuffers(1, &this->id);
-    this->buffer_type = buffer_type;
   };
+  Buffer(const Buffer &) = default;
+  Buffer(Buffer &&) = delete;
+  Buffer &operator=(const Buffer &) = default;
+  Buffer &operator=(Buffer &&) = delete;
 
   void bind() const { glBindBuffer(this->buffer_type, this->id); };
 
@@ -30,20 +45,25 @@ class Shader {
 public:
   unsigned int id;
 
-  Shader(const char *const shader_source, ShaderType shader_type) {
-    id = glCreateShader(shader_type);
-    glShaderSource(id, 1, &shader_source, NULL);
+  Shader(const Shader &) = default;
+  Shader(Shader &&) = delete;
+  Shader &operator=(const Shader &) = default;
+  Shader &operator=(Shader &&) = delete;
+  Shader(const char *const shader_source, ShaderType shader_type)
+      : id(glCreateShader(shader_type)) {
+
+    glShaderSource(id, 1, &shader_source, nullptr);
     glCompileShader(id);
 
-    int success;
+    int success = 0;
     glGetShaderiv(id, GL_COMPILE_STATUS, &success);
 
     if (!success) {
-      char infoLog[512];
-      glGetShaderInfoLog(id, 512, NULL, infoLog);
+      std::array<char, 512> info_log{};
+      glGetShaderInfoLog(id, 512, nullptr, info_log.data());
       glDeleteShader(id);
       std::string error_msg = "ERROR::SHADER::COMPILATION_FAILED\n";
-      error_msg.append(infoLog);
+      error_msg.append(info_log.data());
       throw std::runtime_error(error_msg);
     }
   };
@@ -55,15 +75,17 @@ class ShaderProgram {
 public:
   unsigned int id;
 
-  ShaderProgram(std::vector<Shader> const &shaders) {
-    id = glCreateProgram();
-    for (auto shader : shaders) {
-      glAttachShader(id, shader.id);
-    }
-    glLinkProgram(id);
-  };
+  ShaderProgram() : id(glCreateProgram()) {};
+  ShaderProgram(const ShaderProgram &) = default;
+  ShaderProgram(ShaderProgram &&) = delete;
+  ShaderProgram &operator=(const ShaderProgram &) = default;
+  ShaderProgram &operator=(ShaderProgram &&) = delete;
 
   void use() const { glUseProgram(id); };
+  void attach_shader(const Shader &shader) const {
+    glAttachShader(this->id, shader.id);
+  }
+  void link() const { glLinkProgram(this->id); }
 
   ~ShaderProgram() { glDeleteProgram(id); };
 };

@@ -18,19 +18,27 @@ class Window {
 public:
   GLFWwindow *window;
 
+  Window(const Window &) = default;
+  Window(Window &&) = delete;
+  Window &operator=(const Window &) = default;
+  Window &operator=(Window &&) = delete;
   Window(const int width, const int height, std::string const &title) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    this->window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
-    if (this->window == NULL) {
+    // NOLINTNEXTLINE - This has to happen after the window hints
+    this->window =
+        glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+
+    if (this->window == nullptr) {
       glfwTerminate();
       throw std::runtime_error("failed to create GLFW window");
     }
     glfwMakeContextCurrent(this->window);
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    // NOLINTNEXTLINE - we need to reinterpret_cast
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
       glfwTerminate();
       throw std::runtime_error("failed to initialize GLAD");
     }
