@@ -1,9 +1,37 @@
-#include <glad/glad.h>
-#include <string>
-#include <stdexcept>
 #include <array>
+#include <glad/glad.h>
+#include <stdexcept>
+#include <string>
 
 namespace gl {
+
+class Texture {
+public:
+  unsigned int id{};
+  Texture() { glGenTextures(1, &this->id); }
+  Texture(const Texture &) = default;
+  Texture(Texture &&) = delete;
+  Texture &operator=(const Texture &) = default;
+  Texture &operator=(Texture &&) = delete;
+  ~Texture() { glDeleteTextures(1, &this->id); }
+
+  void bind() const {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, this->id);
+  }
+  void load(const unsigned char *const data, const int width,
+            const int height) const {
+    this->bind();
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                 GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+};
 
 class VertexArray {
 public:
@@ -32,8 +60,10 @@ public:
 
   void bind() const { glBindBuffer(this->buffer_type, this->id); };
 
-  template <typename T> void set_data(const T &buffer_data) {
-    glBufferData(this->buffer_type, sizeof(T), buffer_data, GL_STATIC_DRAW);
+  template <typename T, size_t size>
+  void set_data(const std::array<T, size> &buffer_data) {
+    glBufferData(this->buffer_type, size * sizeof(T), buffer_data.data(),
+                 GL_STATIC_DRAW);
   }
 
   ~Buffer() { glDeleteBuffers(1, &this->id); };
