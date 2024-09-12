@@ -78,12 +78,13 @@ int main() {
   glEnableVertexAttribArray(0);
 
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        // NOLINTNEXTLINE - have to reinterpret_cast
                         reinterpret_cast<void *>(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  unsigned long texture_offset = 6 * sizeof(float);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        reinterpret_cast<void *>(texture_offset));
+                        // NOLINTNEXTLINE - have to reinterpret_cast
+                        reinterpret_cast<void *>(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
   int width = 0, height = 0, nrChannels = 0;
